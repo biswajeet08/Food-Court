@@ -25,32 +25,33 @@ from enum import Enum
 #     def __init__(self, db: Session = Depends(database.get_db)):
 #         db.query(models.Vendor).values
 
-@router.get("/",response_model=list[schemas.ShowVendor], status_code=status.HTTP_200_OK)
-def show_vendors(building:Optional[str] = None, floor:int | None = None, status:bool | None = True, db: Session = Depends(database.get_db)):
 
-    if building == None and floor == None and status == None:
+
+
+@router.get("/",response_model=list[schemas.ShowVendor], status_code=status.HTTP_200_OK)
+def show_vendors(open:bool|None = None, building:Optional[str] = None, floor:int | None = None, db: Session = Depends(database.get_db)):
+
+    if building == None and floor == None and open == None:
         # vendors = db.query(models.Vendor).all()
         vendors = db.execute(text("""SELECT * from Vendors""")).fetchall()
 
     else:
+        query_list = []
         if building != None:
-            building_query = f"SELECT * from Vendors where Vendors.building = {building}"
-        else:
-            building_query = f"SELECT * from Vendors"
-        if floor != None:
-            floor_query = f"SELECT * from Vendors where Vendors.floor = {floor}"
-        else:
-            floor_query = f"SELECT * from Vendors"
+            building_query = f" Vendors.building  = {building} "
+            query_list.append(building_query)
 
-        vendors = db.execute(text(f"({building_query}), ({floor_query})")).fetchall()
-        # vendors = vendors.execute(text(f"{floor_query}")).fetchall()
-        # vendors = db.execute(text("""SELECT * from Vendors""")).fetchall()
-        # d = dict()
-        # if building !=  None: d["building"] = models.Vendor.building == building
-        # if floor != None: d["floor"] = models.Vendor.floor == floor
-        # if status != None: d["status"] = models.Vendor.open == status
-        # vendors = db.query(models.Vendor).whereclause(building exist in models.Vendor.building), d.get("floor",models.Vendor.floor),
-        #                                          d.get("status",models.Vendor.open)).all()
+        if floor != None:
+            floor_query = f" Vendors.floor = {floor} "
+            query_list.append(floor_query)
+
+        if open != None:
+            open_query = f" Vendors.open = {open} "
+            query_list.append(open_query)
+
+        query = " and ". join(query_list)
+        query = f"SELECT * from Vendors where {query}"
+        vendors = db.execute(text(f"{query}")).fetchall()
 
     if not vendors:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Vendor Found")
