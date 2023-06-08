@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
+from typing import TypedDict,Dict
 
 class Vendor(BaseModel):
     name: str
@@ -64,5 +65,14 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str | None = None
+
+class Order(BaseModel):
+    items : dict
+
+
+
+
+
+
 
 
