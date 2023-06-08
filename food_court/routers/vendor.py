@@ -36,9 +36,16 @@ def show_vendors(open:bool|None = None, building:Optional[str] = None, floor:int
         vendors = db.execute(text("""SELECT * from Vendors""")).fetchall()
 
     else:
+        # query_list = []
+        # d = {"open": open, "building": building, "floor": floor}
+        # for check, value in d.items():
+        #     if value != None:
+        #         query = f" {check}  = '{value}'"
+        #         query_list.append(query)
+        #
         query_list = []
         if building != None:
-            building_query = f" Vendors.building  = {building} "
+            building_query = f" Vendors.building  = '{building}' "
             query_list.append(building_query)
 
         if floor != None:
